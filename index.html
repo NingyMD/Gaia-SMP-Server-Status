@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Server Info</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+        }
+        #serverInfo {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Minecraft Server Info</h1>
+    <div>
+        <input type="text" id="serverIp" placeholder="157.90.4.108" required>
+        <input type="text" id="serverPort" placeholder="25624" value="25624">
+        <button onclick="fetchServerInfo()">Get Server Info</button>
+    </div>
+    <div id="serverInfo"></div>
+
+    <script>
+        async function fetchServerInfo() {
+            const serverIp = document.getElementById('serverIp').value.trim();
+            const serverPort = document.getElementById('serverPort').value.trim();
+            const serverInfoDiv = document.getElementById('serverInfo');
+
+            if (!serverIp) {
+                serverInfoDiv.innerHTML = '<p class="error">Please enter a server IP.</p>';
+                return;
+            }
+
+            const apiUrl = `https://api.mcsrvstat.us/3/${serverIp}${serverPort ? `:${serverPort}` : ''}`;
+            serverInfoDiv.innerHTML = '<p>Loading...</p>';
+
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) throw new Error('Failed to fetch server data');
+                const data = await response.json();
+
+                if (data.online) {
+                    serverInfoDiv.innerHTML = `
+                        <h2>${data.hostname || serverIp}</h2>
+                        <p><strong>Status:</strong> Online</p>
+                        <p><strong>Players:</strong> ${data.players?.online || 0} / ${data.players?.max || 0}</p>
+                        <p><strong>Version:</strong> ${data.version || 'Unknown'}</p>
+                        <p><strong>MOTD:</strong> ${data.motd?.clean?.join('<br>') || 'No MOTD'}</p>
+                        ${data.software ? `<p><strong>Software:</strong> ${data.software}</p>` : ''}
+                    `;
+                } else {
+                    serverInfoDiv.innerHTML = '<p class="error">Server is offline or does not exist.</p>';
+                }
+            } catch (error) {
+                serverInfoDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
