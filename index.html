@@ -12,11 +12,6 @@
             padding: 20px;
             text-align: center;
         }
-        input, button {
-            padding: 10px;
-            margin: 5px;
-            font-size: 16px;
-        }
         #serverInfo {
             margin-top: 20px;
             text-align: left;
@@ -28,21 +23,17 @@
 </head>
 <body>
     <h1>Minecraft Server Info</h1>
-    <div>
-        <input type="text" id="serverIp" placeholder="157.90.4.108" required>
-        <input type="text" id="serverPort" placeholder="25624" value="25624">
-        <button onclick="fetchServerInfo()">Get Server Info</button>
-    </div>
     <div id="serverInfo"></div>
 
     <script>
         async function fetchServerInfo() {
-            const serverIp = document.getElementById('serverIp').value.trim();
-            const serverPort = document.getElementById('serverPort').value.trim();
+            // Hardcoded server address and port
+            const serverIp = "157.90.4.108"; // Replace with your server IP
+            const serverPort = "25624"; // Replace with your server port if needed
             const serverInfoDiv = document.getElementById('serverInfo');
 
             if (!serverIp) {
-                serverInfoDiv.innerHTML = '<p class="error">Please enter a server IP.</p>';
+                serverInfoDiv.innerHTML = '<p class="error">Please set a server IP in the code.</p>';
                 return;
             }
 
@@ -62,14 +53,27 @@
                         <p><strong>Version:</strong> ${data.version || 'Unknown'}</p>
                         <p><strong>MOTD:</strong> ${data.motd?.clean?.join('<br>') || 'No MOTD'}</p>
                         ${data.software ? `<p><strong>Software:</strong> ${data.software}</p>` : ''}
+                        <p><strong>Last Updated:</strong> ${new Date().toLocaleString()}</p>
                     `;
                 } else {
-                    serverInfoDiv.innerHTML = '<p class="error">Server is offline or does not exist.</p>';
+                    serverInfoDiv.innerHTML = `
+                        <p class="error">Server is offline or does not exist.</p>
+                        <p><strong>Last Updated:</strong> ${new Date().toLocaleString()}</p>
+                    `;
                 }
             } catch (error) {
-                serverInfoDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+                serverInfoDiv.innerHTML = `
+                    <p class="error">Error: ${error.message}</p>
+                    <p><strong>Last Updated:</strong> ${new Date().toLocaleString()}</p>
+                `;
             }
         }
+
+        // Fetch server info immediately on page load
+        fetchServerInfo();
+
+        // Fetch server info every 15 seconds
+        setInterval(fetchServerInfo, 15000);
     </script>
 </body>
 </html>
